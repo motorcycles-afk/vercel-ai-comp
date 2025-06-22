@@ -1,6 +1,6 @@
 import { anthropic } from "@ai-sdk/anthropic";
 import { streamText, generateText } from "ai";
-import { killDesktop, getDesktopURL } from "@/lib/e2b/utils";
+import { getDesktopURL } from "@/lib/e2b/utils";
 import { bashTool, computerTool } from "@/lib/e2b/tool";
 
 // Allow streaming responses up to 30 seconds
@@ -32,7 +32,7 @@ function convertMessages(messages: OpenAIMessage[]) {
 }
 
 // Create streaming response in OpenAI format
-function createStreamingResponse(result: any) {
+function createStreamingResponse(result: { textStream: AsyncIterable<string> }) {
   const encoder = new TextEncoder();
   
   const stream = new ReadableStream({
@@ -94,7 +94,7 @@ function createStreamingResponse(result: any) {
 export async function POST(req: Request) {
   try {
     const body: OpenAIRequest = await req.json();
-    const { messages, stream = false, model, ...otherParams } = body;
+    const { messages, stream = false, ...otherParams } = body;
 
     // Create or get existing sandbox
     let sandboxId: string;
@@ -186,7 +186,7 @@ export async function POST(req: Request) {
   }
 }
 
-export async function OPTIONS(req: Request) {
+export async function OPTIONS() {
   return new Response(null, {
     status: 200,
     headers: {
